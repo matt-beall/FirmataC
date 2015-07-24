@@ -368,7 +368,7 @@ int   firmata_analogWrite(t_firmata *firmata, int pin, int value)
   int   res;
 
   uint8_t buff[3];
-  printf("Writing analogWrite at: %i with value: %i\n", pin, value);
+  // printf("Writing analogWrite at: %i with value: %i\n", pin, value);
   buff[0] = 0xE0 | pin;
   buff[1] = value & 0x7F;
   buff[2] = (value >> 7) & 0x7F;
@@ -397,7 +397,7 @@ int   firmata_digitalWrite(t_firmata *firmata, int pin, int value)
     }
       }
   }
-  printf("Writing digitalWrite at: %i with value: %i\n", pin, value);
+  // printf("Writing digitalWrite at: %i with value: %i\n", pin, value);
   buff[0] = FIRMATA_DIGITAL_MESSAGE | port_num;
   buff[1] = port_val & 0x7F;
   buff[2] = (port_val >> 7) & 0x7F;

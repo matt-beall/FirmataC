@@ -66,8 +66,6 @@ int		serial_setControl(t_serial *serial, int dtr, int rts);
 t_serial    *serial_new()
 {
   t_serial  *res;
-
-  //res = malloc(sizeof(struct t_serial));
   res = new t_serial;
   if (!res)
     {
