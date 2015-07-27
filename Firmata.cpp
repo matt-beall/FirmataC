@@ -1,109 +1,3 @@
-/*  FirmataC Firmata                                                            
- *  Copyright 2013, Jules Dourlens (jdourlens@gmail.com)                       
- *  Mainly based on Firmata GUI-Friendly by Paul Stoffregen (paul@pjrc.com)    
- *                                                                             
- *  This program is free software: you can redistribute it and/or modify       
- *  it under the terms of the GNU General Public License as published by       
- *  the Free Software Foundation, either version 3 of the License, or          
- *  (at your option) any later version.                                        
- *                                                                             
- *  This program is distributed in the hope that it will be useful,            
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of             
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the              
- *  GNU General Public License for more details.                               
- *                                                                             
- *  You should have received a copy of the GNU General Public License          
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.      
- */
-
-#ifndef		__H_FIRMATAC_
-#define		__H_FIRMATAC_
-
-#include	"Firmata/src/serial.h"
-
-#include  <string.h>
-#include  <stdlib.h>
-#include  <stdio.h>
-
-
-#define MODE_INPUT	0x00
-#define MODE_OUTPUT	0x01
-#define MODE_ANALOG	0x02
-#define MODE_PWM	0x03
-#define MODE_SERVO	0x04
-#define MODE_SHIFT	0x05
-#define MODE_I2C	0x06
-
-#define LOW		0
-#define HIGH		1
-
-#define FIRMATA_START_SYSEX		0xF0 // start a MIDI Sysex message                                                   
-#define FIRMATA_END_SYSEX		0xF7 // end a MIDI Sysex message                                                     
-#define FIRMATA_PIN_MODE_QUERY		0x72 // ask for current and supported pin modes                                      
-#define FIRMATA_PIN_MODE_RESPONSE	0x73 // reply with current and supported pin modes                                   
-#define FIRMATA_PIN_STATE_QUERY		0x6D
-#define FIRMATA_PIN_STATE_RESPONSE	0x6E
-#define FIRMATA_CAPABILITY_QUERY	0x6B
-#define FIRMATA_CAPABILITY_RESPONSE	0x6C
-#define FIRMATA_ANALOG_MAPPING_QUERY	0x69
-#define FIRMATA_ANALOG_MAPPING_RESPONSE	0x6A
-
-#define FIRMATA_DIGITAL_MESSAGE         0x90 // send data for a digital pin
-#define FIRMATA_ANALOG_MESSAGE          0xE0 // send data for an analog pin (or PWM)
-#define FIRMATA_ANALOG_MESSAGE          0xE0 // send data for an analog pin (or PWM)
-#define FIRMATA_REPORT_ANALOG           0xC0 // enable analog input by pin #
-#define FIRMATA_REPORT_DIGITAL          0xD0 // enable digital input by port pair
-
-#define FIRMATA_SET_PIN_MODE            0xF4 // set a pin to INPUT/OUTPUT/PWM/etc
-
-#define FIRMATA_REPORT_VERSION          0xF9 // report protocol version
-#define FIRMATA_SYSTEM_RESET            0xFF // reset from MIDI
-
-#define FIRMATA_START_SYSEX             0xF0 // start a MIDI Sysex message
-#define FIRMATA_END_SYSEX               0xF7 // end a MIDI Sysex message
- 
-// extended command set using sysex (0-127/0x00-0x7F)
-/* 0x00-0x0F reserved for custom commands */
-#define FIRMATA_SERVO_CONFIG            0x70 // set max angle, minPulse, maxPulse, freq
-#define FIRMATA_STRING                  0x71 // a string message with 14-bits per char
-#define FIRMATA_REPORT_FIRMWARE         0x79 // report name and version of the firmware
-#define FIRMATA_SYSEX_NON_REALTIME      0x7E // MIDI Reserved for non-realtime messages
-#define FIRMATA_SYSEX_REALTIME          0x7F // MIDI Reserved for realtime messages
-
-#define FIRMATA_MSG_LEN			1024
-
-typedef struct s_pin
-{
-  uint8_t		mode;
-  uint8_t		analog_channel;
-  uint64_t		supported_modes;
-  uint32_t		value;
-}			t_pin;
-
-typedef struct s_firmata
-{
-  t_serial		*serial;
-  t_pin			pins[128];
-  int			parse_command_len;
-  int			parse_count;
-  uint8_t		parse_buff[FIRMATA_MSG_LEN];
-  int			isReady;
-  char			firmware[140];
-
-}			t_firmata;
-
-t_firmata		*firmata_new(char *name);
-void			firmata_initPins(t_firmata *firmata);
-int			firmata_askFirmware(t_firmata *firmata);
-int			firmata_pinMode(t_firmata *firmata, int pin, int mode);
-int			firmata_digitalWrite(t_firmata *firmata, int pin, int value);
-int			firmata_analogWrite(t_firmata *firmata, int pin, int value);
-int			firmata_pull(t_firmata *firmata);
-void			firmata_parse(t_firmata *firmata, const uint8_t *buf, int len);
-void			firmata_endParse(t_firmata *firmata);
-
-
-
 
 
 /*  FirmataC Firmata                                                            
@@ -124,7 +18,9 @@ void			firmata_endParse(t_firmata *firmata);
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.      
  */
 
-t_firmata *firmata_new(char *name)
+#include "Firmata/Firmata.h"
+
+t_firmata* Firmata::firmata_new(char *name)
 {
   t_firmata *res;
 
@@ -135,33 +31,33 @@ t_firmata *firmata_new(char *name)
       perror("firmata_new::Failed to create new firmata");
       return (NULL);
     }
-  res->serial = serial_new();
+  res->serial = FirmataSerial::serial_new();
   if (!res->serial)
     {
       perror("firmata_new::Failed to create serial connection");
       return (NULL);
     }
-  serial_open(res->serial, name);
-  firmata_initPins(res);
-  serial_setBaud(res->serial, 57600);
-  firmata_askFirmware(res);
+  FirmataSerial::serial_open(res->serial, name);
+  Firmata::firmata_initPins(res);
+  FirmataSerial::serial_setBaud(res->serial, 57600);
+  Firmata::firmata_askFirmware(res);
   printf("Device opened at: %s\n", name);
   return (res);
 }
 
-int   firmata_pull(t_firmata *firmata)
+int   Firmata::firmata_pull(t_firmata *firmata)
 {
   uint8_t buff[FIRMATA_MSG_LEN];
   int   r;
 
-  r = serial_waitInput(firmata->serial, 40);
+  r = FirmataSerial::serial_waitInput(firmata->serial, 40);
   if (r > 0) {
-    r = serial_read(firmata->serial, buff, sizeof(buff));
+    r = FirmataSerial::serial_read(firmata->serial, buff, sizeof(buff));
     if (r < 0) {
       return (0);
     }
     if (r > 0) {
-      firmata_parse(firmata, buff, r);
+      Firmata::firmata_parse(firmata, buff, r);
       return (r);
     }
   } else if (r < 0) {
@@ -171,7 +67,7 @@ int   firmata_pull(t_firmata *firmata)
   return r;
 }
 
-void    firmata_parse(t_firmata *firmata, const uint8_t *buf, int len)
+void    Firmata::firmata_parse(t_firmata *firmata, const uint8_t *buf, int len)
 {
   const uint8_t *p;
   const uint8_t *end;
@@ -200,14 +96,14 @@ void    firmata_parse(t_firmata *firmata, const uint8_t *buf, int len)
       firmata->parse_count++;
     }
     if (firmata->parse_count == firmata->parse_command_len) {
-      firmata_endParse(firmata);
+      Firmata::firmata_endParse(firmata);
       firmata->parse_count = 0;
       firmata->parse_command_len = 0;
     }
   }
 }
 
-void    firmata_endParse(t_firmata *firmata)
+void    Firmata::firmata_endParse(t_firmata *firmata)
 {
   uint8_t cmd = (firmata->parse_buff[0] & 0xF0);
   int   pin;
@@ -271,7 +167,7 @@ void    firmata_endParse(t_firmata *firmata)
   buf[len++] = 1;
       }
       firmata->isReady = 1;
-      serial_write(firmata->serial, buf, len);
+      FirmataSerial::serial_write(firmata->serial, buf, len);
     } else if (firmata->parse_buff[1] == FIRMATA_CAPABILITY_RESPONSE) {
       int pin, i, n;
       for (pin=0; pin < 128; pin++) {
@@ -299,7 +195,7 @@ void    firmata_endParse(t_firmata *firmata)
     buf[len++] = pin;
     buf[len++] = FIRMATA_END_SYSEX;
   }
-  serial_write(firmata->serial, buf, len);
+  FirmataSerial::serial_write(firmata->serial, buf, len);
       }
     } else if (firmata->parse_buff[1] == FIRMATA_ANALOG_MAPPING_RESPONSE) {
       int pin = 0;
@@ -322,7 +218,7 @@ void    firmata_endParse(t_firmata *firmata)
 
 }
 
-void    firmata_initPins(t_firmata *firmata)
+void    Firmata::firmata_initPins(t_firmata *firmata)
 {
   int   i;
 
@@ -337,7 +233,7 @@ void    firmata_initPins(t_firmata *firmata)
   }
 }
 
-int   firmata_askFirmware(t_firmata *firmata)
+int   Firmata::firmata_askFirmware(t_firmata *firmata)
 {
   uint8_t buf[3];
   int   res;
@@ -345,11 +241,11 @@ int   firmata_askFirmware(t_firmata *firmata)
   buf[0] = FIRMATA_START_SYSEX;
   buf[1] = FIRMATA_REPORT_FIRMWARE; // read firmata name & version                     
   buf[2] = FIRMATA_END_SYSEX;
-  res = serial_write(firmata->serial, buf, 3);
+  res = FirmataSerial::serial_write(firmata->serial, buf, 3);
   return (res);
 }
 
-int   firmata_pinMode(t_firmata *firmata, int pin, int mode)
+int   Firmata::firmata_pinMode(t_firmata *firmata, int pin, int mode)
 {
   int   res;
   uint8_t buff[4];
@@ -359,11 +255,11 @@ int   firmata_pinMode(t_firmata *firmata, int pin, int mode)
   buff[1] = pin;
   buff[2] = mode;
   printf("Setting pinMode at: %i with value: %i\n", pin, mode);
-  res = serial_write(firmata->serial, buff, 3);
+  res = FirmataSerial::serial_write(firmata->serial, buff, 3);
   return (res);
 }
 
-int   firmata_analogWrite(t_firmata *firmata, int pin, int value)
+int   Firmata::firmata_analogWrite(t_firmata *firmata, int pin, int value)
 {
   int   res;
 
@@ -372,11 +268,11 @@ int   firmata_analogWrite(t_firmata *firmata, int pin, int value)
   buff[0] = 0xE0 | pin;
   buff[1] = value & 0x7F;
   buff[2] = (value >> 7) & 0x7F;
-  res = serial_write(firmata->serial, buff, 3);
+  res = FirmataSerial::serial_write(firmata->serial, buff, 3);
   return (res);
 }
 
-int   firmata_digitalWrite(t_firmata *firmata, int pin, int value)
+int   Firmata::firmata_digitalWrite(t_firmata *firmata, int pin, int value)
 {
   int   i;
   int   res;
@@ -401,14 +297,6 @@ int   firmata_digitalWrite(t_firmata *firmata, int pin, int value)
   buff[0] = FIRMATA_DIGITAL_MESSAGE | port_num;
   buff[1] = port_val & 0x7F;
   buff[2] = (port_val >> 7) & 0x7F;
-  res = serial_write(firmata->serial, buff, 3);
+  res = FirmataSerial::serial_write(firmata->serial, buff, 3);
   return (res);
 }
-
-
-
-
-
-
-
-#endif

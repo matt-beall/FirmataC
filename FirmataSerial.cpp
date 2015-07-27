@@ -1,69 +1,7 @@
-/*  FirmataC Serial                                    
- *  Copyright 2013, Jules Dourlens (jdourlens@gmail.com)
- *  Mainly based on Firmata GUI-Friendly by Paul Stoffregen (paul@pjrc.com)  
- *                                                                        
- *  This program is free software: you can redistribute it and/or modify  
- *  it under the terms of the GNU General Public License as published by  
- *  the Free Software Foundation, either version 3 of the License, or     
- *  (at your option) any later version.                                   
- *                                                                        
- *  This program is distributed in the hope that it will be useful,       
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of        
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         
- *  GNU General Public License for more details.                          
- *                                                                        
- *  You should have received a copy of the GNU General Public License     
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 
-#ifndef __H_FIRMATAC_SERIAL_
-#define __H_FIRMATAC_SERIAL_
+#include "Firmata/FirmataSerial.h"
 
-#include <stdint.h>
-
-#include <termios.h>
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <sys/types.h>
-#include <fcntl.h>
-#include <errno.h>
-#include <sys/select.h>
-#include <termios.h>
-#include <unistd.h>
-#include <dirent.h>
-#include <sys/stat.h>
-#include <sys/ioctl.h>
-#include <linux/serial.h>
-
-typedef struct s_serial
-{
-  int			port_is_open;
-  char			*port_name;
-  int			baud_rate;
-  char			*error_msg;
-
-  int			port_fd;
-  struct termios	settings_orig;
-  struct termios	settings;
-  int			tx;
-  int			rx;
-}			t_serial;
-
-t_serial		*serial_new();
-int             serial_open(t_serial *serial, char *name);
-int		serial_setBaud(t_serial *serial, int baud);
-int		serial_read(t_serial *serial, void *ptr, int count);
-int		serial_write(t_serial *serial, void *ptr, int len);
-int		serial_waitInput(t_serial *serial, int msec);
-int		serial_discardInput(t_serial *serial);
-void		serial_flushOutput(t_serial *serial);
-int		serial_setControl(t_serial *serial, int dtr, int rts);
-
-
-
-
-t_serial    *serial_new()
+t_serial* FirmataSerial::serial_new()
 {
   t_serial  *res;
   res = new t_serial;
@@ -78,7 +16,7 @@ t_serial    *serial_new()
   return (res);
 }
 
-int     serial_open(t_serial *serial, char *name)
+int     FirmataSerial::serial_open(t_serial *serial, char *name)
 {
   struct serial_struct  kernel_serial_settings;
   int           bits;
@@ -142,7 +80,7 @@ int     serial_open(t_serial *serial, char *name)
   return 0;
 }
 
-int serial_setBaud(t_serial *serial, int baud)
+int FirmataSerial::serial_setBaud(t_serial *serial, int baud)
 {
   speed_t spd;
   switch (baud) {
@@ -223,7 +161,7 @@ int serial_setBaud(t_serial *serial, int baud)
   return (0);
 }
 
-int     serial_read(t_serial *serial, void *ptr, int count)
+int     FirmataSerial::serial_read(t_serial *serial, void *ptr, int count)
 {
   int       n, bits;
 
@@ -240,7 +178,7 @@ int     serial_read(t_serial *serial, void *ptr, int count)
   return (n);
 }
 
-int     serial_write(t_serial *serial, void *ptr, int len)
+int     FirmataSerial::serial_write(t_serial *serial, void *ptr, int len)
 {
   //printf("Write %d\n", len);                                                                                 
   if (!serial->port_is_open) return -1;
@@ -268,7 +206,7 @@ int     serial_write(t_serial *serial, void *ptr, int len)
   return (written);
 }
 
-int     serial_waitInput(t_serial *serial, int msec)
+int     FirmataSerial::serial_waitInput(t_serial *serial, int msec)
 {
   if (!serial->port_is_open) return -1;
   fd_set rfds;
@@ -280,7 +218,7 @@ int     serial_waitInput(t_serial *serial, int msec)
   return (select(serial->port_fd+1, &rfds, NULL, NULL, &tv));
 }
 
-int     serial_discardInput(t_serial *serial)
+int     FirmataSerial::serial_discardInput(t_serial *serial)
 {
   if (!serial->port_is_open) return -1;
   // does this really work properly (and is it thread safe) on Linux??                                         
@@ -289,7 +227,7 @@ int     serial_discardInput(t_serial *serial)
   return 0;
 }
 
-void        serial_flushOutput(t_serial *serial)
+void        FirmataSerial::serial_flushOutput(t_serial *serial)
 {
   if (serial->port_is_open)
   {
@@ -297,7 +235,7 @@ void        serial_flushOutput(t_serial *serial)
   }
 }
 
-int     serial_setControl(t_serial *serial, int dtr, int rts)
+int     FirmataSerial::serial_setControl(t_serial *serial, int dtr, int rts)
 {
   if (!serial->port_is_open) return -1;
   int bits;
@@ -316,8 +254,3 @@ int     serial_setControl(t_serial *serial, int dtr, int rts)
   return (0);
 }
 
-
-
-
-
-#endif
