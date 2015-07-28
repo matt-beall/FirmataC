@@ -39,7 +39,7 @@ t_firmata* Firmata::firmata_new(char *name)
     }
   FirmataSerial::serial_open(res->serial, name);
   Firmata::firmata_initPins(res);
-  FirmataSerial::serial_setBaud(res->serial, 2000000);
+  FirmataSerial::serial_setBaud(res->serial, 57600);
   Firmata::firmata_askFirmware(res);
   printf("Device opened at: %s\n", name);
   return (res);
