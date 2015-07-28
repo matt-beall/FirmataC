@@ -10,7 +10,7 @@ t_serial* FirmataSerial::serial_new()
       return (NULL);
     }
   res->port_is_open = 0;
-  res->baud_rate = 38400;
+  res->baud_rate = 57600;
   res->tx = 0;
   res->rx = 0;
   return (res);
