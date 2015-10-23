@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include	"Firmata/Firmata.h"
+#include	"Firmata.h"
 
 
 #include    <stdlib.h>

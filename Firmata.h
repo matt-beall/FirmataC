@@ -18,7 +18,7 @@
 #pragma once
 
 
-#include	"Firmata/FirmataSerial.h"
+#include	"FirmataSerial.h"
 
 #include  <string.h>
 #include  <stdlib.h>

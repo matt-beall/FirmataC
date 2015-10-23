@@ -1,5 +1,5 @@
 
-#include "Firmata/FirmataSerial.h"
+#include "FirmataSerial.h"
 
 t_serial* FirmataSerial::serial_new()
 {

@@ -1,4 +1,4 @@
-#include "Firmata/FirmataServo.h"
+#include "FirmataServo.h"
 
 
 t_servo* FirmataServo::servo_attach(t_firmata *firmata, int pin)

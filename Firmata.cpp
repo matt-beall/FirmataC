@@ -18,7 +18,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.      
  */
 
-#include "Firmata/Firmata.h"
+#include "Firmata.h"
 
 t_firmata* Firmata::firmata_new(char *name)
 {
