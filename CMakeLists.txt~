@@ -1,8 +1,0 @@
-ADD_LIBRARY(gpcMathLib
-    GPCMath.cpp
-)
-
-ADD_LIBRARY(gpcReadWriteLib
-    GPCMath.cpp
-    GPCReadWrite.cpp
-)
